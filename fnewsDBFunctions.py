@@ -18,6 +18,7 @@ host = "localhost"
 dbuser = ""
 dbpass = ""
 dbase = ""
+outputFile = ""
 
 def PrintQueryResult (qdata):
    print "<table border=0 cellspacing=10>"
@@ -208,7 +209,7 @@ def GraphOutput (qdata):
    plt.bar(x_pos,plotValues,xerr=0,align='center',alpha=0.75, facecolor='g')
    plt.xticks(x_pos, plotKeys)
    plt.ylabel('Number of Articles')
-   fig.savefig('/Library/WebServer/Documents/dbTest/graph.png')
+   fig.savefig(outputFile)
 
    print "<div align=center><img src=\"http://localhost/dbTest/graph.png\"></div>"
 
