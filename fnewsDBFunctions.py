@@ -15,9 +15,9 @@ os.environ['PYTHON_EGG_CACHE'] = '/tmp'
 selectFields = ['Title','Author','Date','DateEnd','Type','Category','Url']
 xaxisField = ''
 host = "localhost"
-dbuser = "root"
-dbpass = "wimbley666"
-dbase = "fNewsTest"
+dbuser = ""
+dbpass = ""
+dbase = ""
 
 def PrintQueryResult (qdata):
    print "<table border=0 cellspacing=10>"
