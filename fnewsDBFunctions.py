@@ -15,10 +15,10 @@ os.environ['PYTHON_EGG_CACHE'] = '/tmp'
 selectFields = ['Title','Author','Date','DateEnd','Type','Category','Url']
 xaxisField = ''
 host = "localhost"
-dbuser = ""
-dbpass = ""
-dbase = ""
-outputFile = ""
+dbuser = "root"
+dbpass = "wimbley666"
+dbase = "fNewsTest"
+outputFile = "/Library/WebServer/Documents/dbTest/graph.png"
 
 def PrintQueryResult (qdata):
    print "<table border=0 cellspacing=10>"
@@ -207,8 +207,9 @@ def GraphOutput (qdata):
    fig = plt.figure(figsize=(8,4))
    x_pos = np.arange(len(plotKeys))
    plt.bar(x_pos,plotValues,xerr=0,align='center',alpha=0.75, facecolor='g')
-   plt.xticks(x_pos, plotKeys)
+   plt.xticks(x_pos, plotKeys,rotation=35)
    plt.ylabel('Number of Articles')
+   fig.tight_layout()
    fig.savefig(outputFile)
 
    print "<div align=center><img src=\"http://localhost/dbTest/graph.png\"></div>"
