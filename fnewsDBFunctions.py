@@ -15,15 +15,19 @@ os.environ['PYTHON_EGG_CACHE'] = '/tmp'
 selectFields = ['Title','Author','Date','DateEnd','Type','Category','Url']
 xaxisField = ''
 host = "localhost"
-dbuser = "root"
-dbpass = "fnewsCquell"
-dbase = "fnewsArticles"
-outputFile = "/Library/WebServer/Documents/dbdata/graph.png"
+dbuser = ""
+dbpass = ""
+dbase = ""
+outputFile = "/Library/WebServer/Documents/dbTest/graph.png"
 
 def PrintQueryResult (qdata):
+   tdata = GetArticleTypeList();
+   cdata = GetArticleCategoryList();
    print "<table border=0 cellspacing=10>"
    print "<th align=left>Title:</th> <th align=left>Author:</th> <th align=left>Date:</th> <th align=left>Type:</th> <th align=left>Category:</th> <th align=left>Link:</th>"
    for row in qdata:
+      qs = "/cgi-bin/fnewsModify.py?%s" % (row['Url'])
+      print "<form method=\"POST\" action=\"%s\">" % qs
       print "<tr>"
       print "<td> %s </td>" % row['Title']
       print "<td> %s </td>" % row['Author']
@@ -31,10 +35,39 @@ def PrintQueryResult (qdata):
       print "<td> %s </td>" % row['Type']
       print "<td> %s </td>" % row['Category']
       print "<td> <a href=\"%s\">Article Link</a> </td>" % row['Url']
+      print "<td> <select name=\"Category\">"
+      for nrow in cdata:
+	print "<option>%s" % nrow['category']
+      print "</select></td>"
+      print "<td> <select name=\"Type\">"
+      for nrow in tdata:
+        print "<option>%s" % nrow['type']
+      print "</select></td>"
+      print "<td><input type=\"submit\" value=\"Modify\"></td>"
       print "</tr>"
+      print "</form>"
    print "</table>"
 
+def ModifyQueryResult():
+    query_string = os.environ['QUERY_STRING']
+    print "%s" % query_string 
+    sql = "select * from ArticleInfo where Url=\"%s\"" % query_string
+    data = GetQueryData(sql)
+    for row in data:
+        aCat = row['Category']
+        aType = row['Type']
 
+    inCat = form.getvalue('Category', '');
+    inType = form.getvalue('Type', '');
+
+    if inCat != aCat:
+	sql = "update articleInfo set Category=\"%s\" where Url=\"%s\"" % (inCat,query_string)
+	db = connectDatabase()
+        cursor = db.cursor()
+        cursor.execute(sql)
+        db.commit()
+        disconnectDatabase(db)
+        print "%s %s %s %s" % (aCat,aType,inCat,inType)
 
 def GetSqlQueryString():
    mc = 0
@@ -196,9 +229,11 @@ def GraphOutput (qdata):
    grData = {}
    for row in qdata:
         grKey = row[xaxisField]
+	grKey = grKey.decode('utf8')
         grData[grKey] = 0;
    for row in qdata:
         grKey = row[xaxisField]
+	grKey = grKey.decode('utf8')
         grData[grKey] = grData[grKey] + 1;
 
    plotKeys = grData.keys();
@@ -207,12 +242,12 @@ def GraphOutput (qdata):
    fig = plt.figure(figsize=(8,4))
    x_pos = np.arange(len(plotKeys))
    plt.bar(x_pos,plotValues,xerr=0,align='center',alpha=0.75, facecolor='g')
-   plt.xticks(x_pos, plotKeys,rotation=35)
+   plt.xticks(x_pos, plotKeys,rotation=90)
    plt.ylabel('Number of Articles')
    fig.tight_layout()
    fig.savefig(outputFile)
 
-   print "<div align=center><img src=\"/dbdata/graph.png\"></div>"
+   print "<div align=center><img src=\"/dbTest/graph.png\"></div>"
 
 def getXlabel():
   return form.getvalue('xaxis', '')
