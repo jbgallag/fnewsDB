@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/python
 
 import os
 import MySQLdb
@@ -16,9 +16,9 @@ selectFields = ['Title','Author','Date','DateEnd','Type','Category','Url']
 xaxisField = ''
 host = "localhost"
 dbuser = "root"
-dbpass = "wimbley666"
-dbase = "fNewsTest"
-outputFile = "/Library/WebServer/Documents/dbTest/graph.png"
+dbpass = "fnewsCquell"
+dbase = "fnewsArticles"
+outputFile = "/Library/WebServer/Documents/dbdata/graph.png"
 
 def PrintQueryResult (qdata):
    print "<table border=0 cellspacing=10>"
@@ -212,7 +212,7 @@ def GraphOutput (qdata):
    fig.tight_layout()
    fig.savefig(outputFile)
 
-   print "<div align=center><img src=\"http://localhost/dbTest/graph.png\"></div>"
+   print "<div align=center><img src=\"/dbdata/graph.png\"></div>"
 
 def getXlabel():
   return form.getvalue('xaxis', '')

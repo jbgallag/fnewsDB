@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/python
 print "Content-Type: text/html\n\n"
 
 print "<html>"
@@ -16,7 +16,7 @@ print "   }"
 print "</style>"
 print "</head>"
 print "<body>"
-print "<iframe class=\"insert\" src=\"http://localhost/cgi-bin/fnewsDataConsole.py\" name=\"insert\"></iframe>"
+print "<iframe class=\"insert\" src=\"/cgi-bin/fnewsDataConsole.py\" name=\"insert\"></iframe>"
 print "<iframe class=\"Display\" src=about:blank name=\"Display\"></iframe>"
 print "</body>"
 print "</html>"
