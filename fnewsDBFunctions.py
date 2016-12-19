@@ -12,13 +12,13 @@ import numpy as np
 matplotlib.rcParams.update({'font.size': 8})
 
 os.environ['PYTHON_EGG_CACHE'] = '/tmp'
-selectFields = ['Title','Author','Date','DateEnd','Type','Category','Url']
+selectFields = ['Title','Author','Editor','Date','DateEnd','Type','Category','Url']
 xaxisField = ''
 host = "localhost"
 dbuser = ""
 dbpass = ""
 dbase = ""
-outputFile = "/Library/WebServer/Documents/dbTest/graph.png"
+outputFile = "/Library/WebServer/Documents/dbdata/graph_"
 
 def PrintQueryResult (qdata):
    tdata = GetArticleTypeList();
@@ -50,7 +50,6 @@ def PrintQueryResult (qdata):
 
 def ModifyQueryResult():
     query_string = os.environ['QUERY_STRING']
-    print "%s" % query_string 
     sql = "select * from ArticleInfo where Url=\"%s\"" % query_string
     data = GetQueryData(sql)
     for row in data:
@@ -67,7 +66,10 @@ def ModifyQueryResult():
         cursor.execute(sql)
         db.commit()
         disconnectDatabase(db)
-        print "%s %s %s %s" % (aCat,aType,inCat,inType)
+        #get new data and display it
+        sql = "select * from ArticleInfo where Url=\"%s\"" % query_string
+	ndata = GetQueryData(sql)
+        PrintQueryResult(ndata)
 
 def GetSqlQueryString():
    mc = 0
@@ -81,16 +83,28 @@ def GetSqlQueryString():
 	if useRange == 0:
 		if form.getvalue(field, '') != "NONE" and form.getvalue(field, '') != '':
 			if mc == 0:
-				sql = sql + ' where ' + field + '=' + '\'' + form.getvalue(field, '') + '\''
+				if field == "Editor":
+					sql = sql + ' where ' + 'Author' + '=' + '\'' + form.getvalue(field, '') + '\''
+				else:
+					sql = sql + ' where ' + field + '=' + '\'' + form.getvalue(field, '') + '\''
 			else:
-				sql = sql + ' and ' + field + '=' + '\'' + form.getvalue(field, '') + '\''
+				if field == "Editor":
+					sql = sql + ' and ' + 'Author' + '=' + '\'' + form.getvalue(field, '') + '\''
+				else:
+					sql = sql + ' and ' + field + '=' + '\'' + form.getvalue(field, '') + '\''
 			mc = mc + 1
         else:
 		if field != "Date" and field != "DateEnd" and form.getvalue(field, '') != "NONE" and form.getvalue(field, '') != '':
 			if mc == 0:
-                                sql = sql + ' where ' + field + '=' + '\'' + form.getvalue(field, '') + '\'' 
+				if field == "Editor":
+                                	sql = sql + ' where ' + 'Author' + '=' + '\'' + form.getvalue(field, '') + '\'' 
+				else:
+                                	sql = sql + ' where ' + field + '=' + '\'' + form.getvalue(field, '') + '\'' 
                         else:
-                                sql = sql + ' and ' + field + '=' + '\'' + form.getvalue(field, '') + '\'' 
+				if field == "Editor":
+                                	sql = sql + ' and ' + 'Author' + '=' + '\'' + form.getvalue(field, '') + '\'' 
+				else:
+                                	sql = sql + ' and ' + field + '=' + '\'' + form.getvalue(field, '') + '\'' 
                         mc = mc + 1
 
    if useRange == 1:
@@ -121,6 +135,17 @@ def GetArticleAuthorList():
    disconnectDatabase(db)
    return data
 
+def GetArticleEditorList():
+   sql = "select * from articleEditor"
+   db = connectDatabase()
+   cursor = db.cursor(MySQLdb.cursors.DictCursor)
+   cursor.execute(sql)
+   db.commit()
+   data = cursor.fetchall()
+   disconnectDatabase(db)
+   return data
+
+
 def GetArticleTypeList():
    sql = "select * from articleType"
    db = connectDatabase()
@@ -147,6 +172,17 @@ def InsertArticleAuthor():
     #get db cursor and submit sql
     cursor = db.cursor()
     sql = "INSERT INTO articleAuthor (AUTHOR) VALUES ('%s')" % aAuth
+    cursor.execute(sql)
+    db.commit()
+    #disconnect from db
+    disconnectDatabase(db)
+
+def InsertArticleEditor():
+    aEdit = form.getvalue('author', '')
+    db = connectDatabase()
+    #get db cursor and submit sql
+    cursor = db.cursor()
+    sql = "INSERT INTO articleEditor (editor) VALUES ('%s')" % aEdit
     cursor.execute(sql)
     db.commit()
     #disconnect from db
@@ -185,12 +221,23 @@ def DeleteArticleAuthor():
     #disconnect from db
     disconnectDatabase(db)
 
+def DeleteArticleEditor():
+    aEdit = form.getvalue('editors', '')
+    db = connectDatabase()
+    #get db cursor and submit sql
+    cursor = db.cursor()
+    sql = "DELETE FROM articleEditor where editor='%s'" % aEdit
+    cursor.execute(sql);
+    db.commit()
+    #disconnect from db
+    disconnectDatabase(db)
+
 def DeleteArticleType():
     aType = form.getvalue('types', '')
     db = connectDatabase()
     #get db cursor and submit sql
     cursor = db.cursor()
-    sql = "DELETE FROM articleAuthor where Type='%s'" % aType
+    sql = "DELETE FROM articleType where Type='%s'" % aType
     cursor.execute(sql);
     db.commit()
     #disconnect from db
@@ -201,7 +248,7 @@ def DeleteArticleCategory():
     db = connectDatabase()
     #get db cursor and submit sql
     cursor = db.cursor()
-    sql = "DELETE FROM articleAuthor where Category='%s'" % aCat
+    sql = "DELETE FROM articleCategory where Category='%s'" % aCat
     cursor.execute(sql);
     db.commit()
     #disconnect from db
@@ -238,16 +285,17 @@ def GraphOutput (qdata):
 
    plotKeys = grData.keys();
    plotValues = grData.values();
-
-   fig = plt.figure(figsize=(8,4))
+   nGraphs = ((len(grData)/25) + 1) * 8
+    
+   fig = plt.figure(figsize=(nGraphs,6))
    x_pos = np.arange(len(plotKeys))
    plt.bar(x_pos,plotValues,xerr=0,align='center',alpha=0.75, facecolor='g')
    plt.xticks(x_pos, plotKeys,rotation=90)
    plt.ylabel('Number of Articles')
    fig.tight_layout()
+   outputFile = "/Library/WebServer/Documents/dbdata/graph_%04d.png" % 0
    fig.savefig(outputFile)
-
-   print "<div align=center><img src=\"/dbTest/graph.png\"></div>"
+   print "<div align=center><img src=\"/dbdata/graph_%04d.png\"></div>" % 0
 
 def getXlabel():
   return form.getvalue('xaxis', '')

@@ -3,6 +3,7 @@
 import fnewsDBFunctions
 
 adata = fnewsDBFunctions.GetArticleAuthorList()
+edata = fnewsDBFunctions.GetArticleEditorList()
 tdata = fnewsDBFunctions.GetArticleTypeList()
 cdata = fnewsDBFunctions.GetArticleCategoryList()
 
@@ -101,11 +102,39 @@ print "</table>"
 
 print "</td>"
 
+print "<td>"
+
+print "<font size=3><b>Insert New Editor:</b></font><br>"
+print "<table>"
+print "<tr>"
+print "<form action=\"/cgi-bin/fnewsInsertEditorMain.py\" method=\"post\">"
+print "<td>New Editor:<br>"
+print "<select name=\"author\">"
+for row in adata:
+   print "<option>%s" % row['author']
+print "</select></td>"
+print "</tr>"
+print "<tr>"
+print "<td><input type=submit value=\"Add Editor\"></td>"
+print "</form>"
+print "</tr>"
+print "<tr>"
+print "<form action=\"/cgi-bin/fnewsDeleteEditorMain.py\" method=\"post\">"
+print "<td>Existing Editors:<br>"
+print "<select name=\"editors\">"
+for row in edata:
+   print "<option>%s" % row['editor']
+print "</select></td>"
+print "</tr>"
+print "<tr>"
+print "<td><input type=\"submit\" value=\"Delete Editor\"></td>"
+print "</tr>"
+print "</form>"
+print "</table>"
+
+print "</td>"
+
+
 print "</table>"
 print "</body>"
 print "</html>"
-
-
-
-
-

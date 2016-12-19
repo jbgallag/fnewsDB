@@ -3,6 +3,7 @@
 import fnewsDBFunctions
 
 adata = fnewsDBFunctions.GetArticleAuthorList()
+edata = fnewsDBFunctions.GetArticleEditorList()
 tdata = fnewsDBFunctions.GetArticleTypeList()
 cdata = fnewsDBFunctions.GetArticleCategoryList()
 
@@ -10,6 +11,9 @@ print "Content-type: text/html\n\n"
 
 print "<html>"
 print "<body bgcolor=#ffffff>"
+print "<hr noshade>"
+print "<font size = 4><b>fnews Article Database</b></font>"
+print "<hr noshade>"
 print "<font size=3><b>Insert New Data:</b></font><br>"
 print "<table>"
 print "<tr>"
@@ -21,7 +25,13 @@ print "<td>Article Author:<br>"
 print "<select name=\"Author\">"
 for row in adata:
     print "<option>%s" % row['author']
-print "</select>"
+print "</select> </td>"
+print "<td>Article Editor:<br>"
+print "<select name=\"Editor\">"
+for row in edata:
+    print "<option>%s" % row['editor']
+print "</select> </td>"
+
 print "<td>Date:<br>"
 print "<input type=date name=\"Date\" size=30>"
 print "</td>"
@@ -58,7 +68,13 @@ print "<select name=\"Author\">"
 print "<option>NONE"
 for row in adata:
     print "<option>%s" % row['author']
-print "</select>"
+print "</select></td>"
+print "<td>Article Editor:<br>"
+print "<select name=\"Editor\">"
+print "<option>NONE"
+for row in edata:
+    print "<option>%s" % row['editor']
+print "</select> </td>"
 print "<td>Date:<br>"
 print "<input type=date name=\"Date\" size=30>"
 print "</td>"
@@ -102,7 +118,13 @@ print "<select name=\"Author\">"
 print "<option>NONE"
 for row in adata:
     print "<option>%s" % row['author']
-print "</select>"
+print "</select></td>"
+print "<td>Article Editor:<br>"
+print "<select name=\"Editor\">"
+print "<option>NONE"
+for row in edata:
+    print "<option>%s" % row['editor']
+print "</select> </td>"
 print "<td>Date:<br>"
 print "<input type=date name=\"Date\" size=30>"
 print "</td>"
@@ -129,6 +151,7 @@ print "<td><input type=submit value=\"Graph\"></td>"
 print "</tr>"
 print "</form>"
 print "</table>"
+print "<a href=\"/cgi-bin/fnewsAddFields.py\">Add Categories, Types and Editors</a>"
 print "</body>"
 print "</html>"
 
