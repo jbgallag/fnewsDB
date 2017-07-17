@@ -8,4 +8,4 @@ print "Content-type: text/html\n\n"
 
 sql = fnewsDBFunctions.GetSqlQueryString()
 data = fnewsDBFunctions.GetQueryData(sql)
-fnewsDBFunctions.GraphOutput(data)
+fnewsDBFunctions.GraphOutput(data,sql)

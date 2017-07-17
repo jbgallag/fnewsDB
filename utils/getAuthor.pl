@@ -3,7 +3,7 @@
 open(FILE, "$ARGV[0]");
 while(<FILE>) {
     $_ =~ tr/\n//d;
-    @data = split(/::/ , $_);
+    @data = split(/\t/ , $_);
     @name = split(/\s/, $data[1]);
     for($i=0; $i<=$#name; $i++) {
        $revName = join' ',$revName,$name[$#name-$i];

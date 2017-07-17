@@ -136,5 +136,6 @@ print "</td>"
 
 
 print "</table>"
+print "<a href=\"/cgi-bin/fnewsDataConsole.py\">Return DB Console</a>"
 print "</body>"
 print "</html>"

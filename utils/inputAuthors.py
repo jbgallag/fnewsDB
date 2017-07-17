@@ -11,10 +11,15 @@ with codecs.open(sys.argv[1], 'r', 'utf8') as f:
 
 db = fnewsDBFunctions.connectDatabase();
 cursor = db.cursor()
+
 for x in words:
-   sql = "INSERT INTO articleAuthor (AUTHOR) VALUES ('%s')" % x.encode('utf8')
-   cursor.execute(sql)
+   sql = "select author from articleAuthor where Author=\"%s\"" % x.encode('utf8')
+   rows_count = cursor.execute(sql)
+   if rows_count == 0:
+      sql = "INSERT INTO articleAuthor (AUTHOR) VALUES ('%s')" % x.encode('utf8')
+      cursor.execute(sql)
+      print "Inserted new Author: %s" % sql
    db.commit()
-   print sql
+   #print sql
 
 fnewsDBFunctions.disconnectDatabase(db)

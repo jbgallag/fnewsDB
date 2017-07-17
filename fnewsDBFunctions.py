@@ -12,19 +12,23 @@ import numpy as np
 matplotlib.rcParams.update({'font.size': 8})
 
 os.environ['PYTHON_EGG_CACHE'] = '/tmp'
-selectFields = ['Title','Author','Editor','Date','DateEnd','Type','Category','Url']
+selectFields = ['Title','Author','Editor','Date','DateEnd','Type','Category','Url','Illustration','Illustration_Author']
 xaxisField = ''
 host = "localhost"
-dbuser = ""
-dbpass = ""
-dbase = ""
+dbuser = "root"
+dbpass = "wimbley666"
+dbase = "fnewsTest"
 outputFile = "/Library/WebServer/Documents/dbdata/graph_"
+outputPrintFile = "/Library/WebServer/Documents/dbdata/printVersion_"
 
 def PrintQueryResult (qdata):
    tdata = GetArticleTypeList();
    cdata = GetArticleCategoryList();
+   print "<style> th { font-size: 12px; } td { font-size: 12px; } </style>"
+   print "<b>%d Articles returned</b> <br>" % len(qdata)
    print "<table border=0 cellspacing=10>"
    print "<th align=left>Title:</th> <th align=left>Author:</th> <th align=left>Date:</th> <th align=left>Type:</th> <th align=left>Category:</th> <th align=left>Link:</th>"
+   print "<th align=left>Illustration:</th> <th align=left>Illustration Author:</th>"
    for row in qdata:
       qs = "/cgi-bin/fnewsModify.py?%s" % (row['Url'])
       print "<form method=\"POST\" action=\"%s\">" % qs
@@ -35,18 +39,30 @@ def PrintQueryResult (qdata):
       print "<td> %s </td>" % row['Type']
       print "<td> %s </td>" % row['Category']
       print "<td> <a href=\"%s\">Article Link</a> </td>" % row['Url']
+      if row['Illustration'] != 'None':
+      	print "<td> <a href=\"%s\">Illustration Link</a> </td>" % row['Illustration']
+	print "<td> %s </td>" % row['Illustration_Author']
+      else:
+      	print "<td> None </td>"
+	print "<td> None </td>"
+
       print "<td> <select name=\"Category\">"
+      print "<option>%s" % row['Category']
       for nrow in cdata:
-	print "<option>%s" % nrow['category']
+	if nrow['category'] != row['Category']:
+	 	print "<option>%s" % nrow['category']
       print "</select></td>"
       print "<td> <select name=\"Type\">"
+      print "<option>%s" % row['Type']
       for nrow in tdata:
-        print "<option>%s" % nrow['type']
+	if nrow['type'] != row['Type']:
+        	print "<option>%s" % nrow['type']
       print "</select></td>"
       print "<td><input type=\"submit\" value=\"Modify\"></td>"
       print "</tr>"
       print "</form>"
    print "</table>"
+   print "</p>"
 
 def ModifyQueryResult():
     query_string = os.environ['QUERY_STRING']
@@ -71,9 +87,39 @@ def ModifyQueryResult():
 	ndata = GetQueryData(sql)
         PrintQueryResult(ndata)
 
+    if inType != aType:
+        sql = "update articleInfo set Type=\"%s\" where Url=\"%s\"" % (inType,query_string)
+        db = connectDatabase()
+        cursor = db.cursor()
+        cursor.execute(sql)
+        db.commit()
+        disconnectDatabase(db)
+        #get new data and display it
+        sql = "select * from ArticleInfo where Url=\"%s\"" % query_string
+        ndata = GetQueryData(sql)
+        PrintQueryResult(ndata)
+
+
+def GetArticleEditorSql():
+	sql = "select * from articleEditor"
+	edata = GetQueryData(sql)
+	sql = "select * from articleInfo where "
+        c = 1;
+        for row in edata:
+		if c == 1:
+			sql = sql + '(Author' + '=' + '\'' + row['editor'] + '\'' + ' or '
+        	if c > 1 and c < len(edata):
+                	sql = sql + 'Author' + '=' + '\'' + row['editor'] + '\'' + ' or '
+                if c == len(edata):
+                        sql = sql + 'Author' + '=' + '\'' + row['editor'] + '\')'
+        	c = c + 1
+	return sql
+
+
+        
 def GetSqlQueryString():
    mc = 0
-   useRange = 0;
+   useRange = 0
    sql = "select * from ArticleInfo"
 
    if form.getvalue('DateEnd', '') != '':
@@ -84,12 +130,18 @@ def GetSqlQueryString():
 		if form.getvalue(field, '') != "NONE" and form.getvalue(field, '') != '':
 			if mc == 0:
 				if field == "Editor":
-					sql = sql + ' where ' + 'Author' + '=' + '\'' + form.getvalue(field, '') + '\''
+				   	if form.getvalue(field, '') == "ALL":
+						sql = GetArticleEditorSql()
+					else:
+						sql = sql + ' where ' + 'Author' + '=' + '\'' + form.getvalue(field, '') + '\''
 				else:
 					sql = sql + ' where ' + field + '=' + '\'' + form.getvalue(field, '') + '\''
 			else:
 				if field == "Editor":
-					sql = sql + ' and ' + 'Author' + '=' + '\'' + form.getvalue(field, '') + '\''
+					if form.getvalue(field, '') == "ALL":
+						sql = GetArticleEditorSql()
+					else:
+						sql = sql + ' and ' + 'Author' + '=' + '\'' + form.getvalue(field, '') + '\''
 				else:
 					sql = sql + ' and ' + field + '=' + '\'' + form.getvalue(field, '') + '\''
 			mc = mc + 1
@@ -97,12 +149,18 @@ def GetSqlQueryString():
 		if field != "Date" and field != "DateEnd" and form.getvalue(field, '') != "NONE" and form.getvalue(field, '') != '':
 			if mc == 0:
 				if field == "Editor":
-                                	sql = sql + ' where ' + 'Author' + '=' + '\'' + form.getvalue(field, '') + '\'' 
+					 if form.getvalue(field, '') == "ALL":
+						sql = GetArticleEditorSql()
+                                         else:
+                                		sql = sql + ' where ' + 'Author' + '=' + '\'' + form.getvalue(field, '') + '\'' 
 				else:
                                 	sql = sql + ' where ' + field + '=' + '\'' + form.getvalue(field, '') + '\'' 
                         else:
 				if field == "Editor":
-                                	sql = sql + ' and ' + 'Author' + '=' + '\'' + form.getvalue(field, '') + '\'' 
+					if form.getvalue(field, '') == "ALL":
+						sql = GetArticleEditorSql()
+					else:
+                                		sql = sql + ' and ' + 'Author' + '=' + '\'' + form.getvalue(field, '') + '\'' 
 				else:
                                 	sql = sql + ' and ' + field + '=' + '\'' + form.getvalue(field, '') + '\'' 
                         mc = mc + 1
@@ -272,16 +330,18 @@ def InsertDataFromFormInput():
    disconnectDatabase(db)
    
 
-def GraphOutput (qdata):
+def GraphOutput (qdata,sqlin):
    grData = {}
    for row in qdata:
-        grKey = row[xaxisField]
-	grKey = grKey.decode('utf8')
-        grData[grKey] = 0;
+   	if row[xaxisField] != 'None':
+        	grKey = row[xaxisField]
+		grKey = grKey.decode('utf8')
+        	grData[grKey] = 0;
    for row in qdata:
-        grKey = row[xaxisField]
-	grKey = grKey.decode('utf8')
-        grData[grKey] = grData[grKey] + 1;
+   	if row[xaxisField] != 'None':
+        	grKey = row[xaxisField]
+		grKey = grKey.decode('utf8')
+       		grData[grKey] = grData[grKey] + 1;
 
    plotKeys = grData.keys();
    plotValues = grData.values();
@@ -291,11 +351,32 @@ def GraphOutput (qdata):
    x_pos = np.arange(len(plotKeys))
    plt.bar(x_pos,plotValues,xerr=0,align='center',alpha=0.75, facecolor='g')
    plt.xticks(x_pos, plotKeys,rotation=90)
-   plt.ylabel('Number of Articles')
+
+   if xaxisField == 'Illustration_Author':
+   	plt.ylabel('Number of Illustrations')
+   else:
+	plt.ylabel('Number of Articles')
+
    fig.tight_layout()
    outputFile = "/Library/WebServer/Documents/dbdata/graph_%04d.png" % 0
    fig.savefig(outputFile)
-   print "<div align=center><img src=\"/dbdata/graph_%04d.png\"></div>" % 0
+
+   #replace * with xaxisField and print out html and to file
+   sqlin = sqlin.replace("*",xaxisField)
+   lineOne = "<div align=center>%s</div>" % sqlin
+   lineTwo = "<div align=center><img src=\"/dbdata/graph_%04d.png\"></div>" % 0
+
+   #stdout print
+   print "<div align=cemter><a href=\"/dbdata/print_0000.html\" target=\"_blank\">Print Version</a></div>"
+   print lineOne
+   print lineTwo
+   
+   #file print
+   printFile = "/Library/WebServer/Documents/dbdata/print_%04d.html" % 0 
+   ofile = open(printFile, "w");
+   ofile.write(lineOne)
+   ofile.write(lineTwo)
+   ofile.close
 
 def getXlabel():
   return form.getvalue('xaxis', '')
@@ -310,4 +391,3 @@ def disconnectDatabase(db):
 #global vars
 form = cgi.FieldStorage()
 xaxisField = getXlabel()
-
